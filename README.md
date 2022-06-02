@@ -10,7 +10,7 @@ cd FollinaScanner
 go build
 ```
 
-## Running
+## Usage
 ```sh
 # Scan the current directory
 ./follina-scanner -R .
