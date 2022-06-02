@@ -1,5 +1,5 @@
 # FollinaScanner
-This is a tool written in Go that scans directories & files for the Follina exploit (CVE-2022-30190)
+A tool written in Go that scans files & directories for the Follina exploit (CVE-2022-30190)
 
 ## Compiling
 ```sh
