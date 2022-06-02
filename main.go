@@ -17,8 +17,10 @@ var (
 	recursiveScanning bool
 	verboseOutput     bool
 	scanned           int
-	threats           int
+	infected          int
+	infectedFiles     []string
 	suspicious        int
+	suspiciousFiles   []string
 	warningColor      *color.Color = color.New(color.FgRed)
 )
 
@@ -78,7 +80,18 @@ func main() {
 		if scanned > 0 {
 			fmt.Println()
 		}
-		fmt.Printf("Scanned files: %v\nSuspicious files: %v\nInfected files: %v\n", scanned, suspicious, threats)
+		suspiciousList := strings.Join(suspiciousFiles, ", ")
+		infectedList := strings.Join(infectedFiles, ", ")
+		fmt.Printf(
+			"Scanned files: %v\n"+
+				"Suspicious files (%v): %v\n"+
+				"Infected files (%v): %v\n",
+			scanned,
+			suspicious,
+			suspiciousList,
+			infected,
+			infectedList,
+		)
 	} else {
 		fmt.Println(helpPage)
 	}
@@ -131,6 +144,7 @@ func scanFile(filePath string) {
 			if errorObject != nil {
 				warningColor.Printf("[%v] Unable to send a request: %v\n", filePath, errorObject.Error())
 				suspicious++
+				suspiciousFiles = append(suspiciousFiles, filePath)
 				return
 			}
 			if verboseOutput {
@@ -145,7 +159,8 @@ func scanFile(filePath string) {
 				message := fmt.Sprintf("[%v] Found Follina exploit in %v (%v)", filePath, filePath, url)
 				separator := strings.Repeat("=", len(message))
 				warningColor.Printf("%v\n%v\n%v\n", separator, message, separator)
-				threats++
+				infected++
+				infectedFiles = append(infectedFiles, filePath)
 			} else {
 				fmt.Printf("[%v] No Follina exploit found in %v\n", filePath, filePath)
 			}
