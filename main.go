@@ -43,7 +43,7 @@ func main() {
 			} else {
 				fileData, errorObject := os.Stat(argument)
 				if errorObject != nil {
-					fmt.Println("[%v] %v\n", argument, errorObject.Error())
+					fmt.Printf("[%v] %v\n", argument, errorObject.Error())
 					continue
 				}
 				if fileData.IsDir() {
@@ -61,12 +61,12 @@ func main() {
 									}
 									return nil
 								} else {
-									fmt.Println("[%v] %v\n", argument, errorObject.Error())
+									fmt.Printf("[%v] %v\n", argument, errorObject.Error())
 									return errorObject
 								}
 							})
 						if errorObject != nil {
-							fmt.Println("[%v] %v\n", argument, errorObject.Error())
+							fmt.Printf("[%v] %v\n", argument, errorObject.Error())
 						}
 					} else {
 						fmt.Printf("[%v] Is a directory: %v\n", argument, argument)
