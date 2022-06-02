@@ -14,6 +14,7 @@ import (
 )
 
 var (
+	version           string = "1.0.0"
 	recursiveScanning bool
 	verboseOutput     bool
 	scanned           int
@@ -25,7 +26,7 @@ var (
 )
 
 func main() {
-	helpPage := "Usage: follina-scanner [OPTION]... [FILE]...\n\n" +
+	helpPage := "(" + version + ") Usage: follina-scanner [OPTION]... [FILE]...\n\n" +
 		"\t-R, --recursive\t\tRecursively scan files in a directory\n" +
 		"\t-v, --verbose\t\tDisplay everything that's happening"
 	if len(os.Args) > 1 {
