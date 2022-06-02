@@ -126,7 +126,7 @@ func scanFile(filePath string) {
 				}
 				return
 			}
-			regex := regexp.MustCompile("Target=\"https?://.+\\.html.?\"")
+			regex := regexp.MustCompile("Target=\"(mhtml:|x-usc:)?https?://.+\\.html.?\"")
 			matches := regex.FindAll(fileBytes, 1)
 			if len(matches) == 0 {
 				if verboseOutput {
@@ -134,8 +134,8 @@ func scanFile(filePath string) {
 				}
 				return
 			}
-			match := string(matches[0])
-			url := strings.Trim(match[8:len(match)-1], "!")
+			match := strings.Replace(string(matches[0]), "mhtml:", "", -1)
+			url := strings.Split(match[8:len(match)-1], "!")[0]
 			fmt.Printf("[%v] Found URL in word/_rels/document.xml.rels: \"%v\"\n", filePath, url)
 			if verboseOutput {
 				fmt.Printf("[%v] Sending HTTP GET request to %v...\n", filePath, url)
