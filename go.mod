@@ -1,4 +1,4 @@
-module ryan/follinascanner
+module ryan/follina-scanner
 
 go 1.18
 

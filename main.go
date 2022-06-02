@@ -20,7 +20,7 @@ var (
 )
 
 func main() {
-	helpPage := "Usage: follinascanner [OPTION]... [FILE]...\n\n" +
+	helpPage := "Usage: follina-scanner [OPTION]... [FILE]...\n\n" +
 		"\t-R, --recursive\t\tRecursively scan files in a directory\n" +
 		"\t-v, --verbose\t\tDisplay everything that's happening"
 	if len(os.Args) > 1 {
