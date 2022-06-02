@@ -13,7 +13,7 @@ go build
 ## Usage
 ```sh
 # Scan the current directory
-./follina-scanner -R .
+./follina-scanner -r .
 
 # Scan a specific file
 ./follina-scanner amogus.docx
