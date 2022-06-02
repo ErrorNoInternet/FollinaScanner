@@ -27,7 +27,7 @@ var (
 
 func main() {
 	helpPage := "(" + version + ") Usage: follina-scanner [OPTION]... [FILE]...\n\n" +
-		"\t-R, --recursive\t\tRecursively scan files in a directory\n" +
+		"\t-r, --recursive\t\tRecursively scan files in a directory\n" +
 		"\t-v, --verbose\t\tDisplay everything that's happening"
 	if len(os.Args) > 1 {
 		for index, argument := range os.Args {
@@ -37,7 +37,7 @@ func main() {
 			if argument == "-h" || argument == "--help" {
 				fmt.Println(helpPage)
 				return
-			} else if argument == "-R" || argument == "--recursive" {
+			} else if argument == "-r" || argument == "--recursive" {
 				recursiveScanning = true
 			} else if argument == "-v" || argument == "--verbose" {
 				verboseOutput = true
