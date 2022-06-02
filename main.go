@@ -16,6 +16,9 @@ import (
 var (
 	recursiveScanning bool
 	verboseOutput     bool
+	scanned           int
+	threats           int
+	suspicious        int
 	warningColor      *color.Color = color.New(color.FgRed)
 )
 
@@ -52,6 +55,7 @@ func main() {
 								if errorObject == nil {
 									if !fileData.IsDir() {
 										scanFile(path)
+										scanned++
 									}
 									return nil
 								} else {
@@ -67,9 +71,14 @@ func main() {
 					}
 				} else {
 					scanFile(argument)
+					scanned++
 				}
 			}
 		}
+		if scanned > 0 {
+			fmt.Println()
+		}
+		fmt.Printf("Scanned files: %v\nSuspicious files: %v\nInfected files: %v\n", scanned, suspicious, threats)
 	} else {
 		fmt.Println(helpPage)
 	}
@@ -120,7 +129,8 @@ func scanFile(filePath string) {
 			}
 			responseObject, errorObject := http.Get(url)
 			if errorObject != nil {
-				fmt.Printf("[%v] Unable to send a request: %v\n", filePath, errorObject.Error())
+				warningColor.Printf("[%v] Unable to send a request: %v\n", filePath, errorObject.Error())
+				suspicious++
 				return
 			}
 			if verboseOutput {
@@ -135,6 +145,7 @@ func scanFile(filePath string) {
 				message := fmt.Sprintf("[%v] Found Follina exploit in %v (%v)", filePath, filePath, url)
 				separator := strings.Repeat("=", len(message))
 				warningColor.Printf("%v\n%v\n%v\n", separator, message, separator)
+				threats++
 			} else {
 				fmt.Printf("[%v] No Follina exploit found in %v\n", filePath, filePath)
 			}
