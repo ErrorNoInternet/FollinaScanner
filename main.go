@@ -79,17 +79,15 @@ func main() {
 		if scanned > 0 {
 			fmt.Println()
 		}
-		suspiciousList := strings.Join(suspiciousFiles, ", ")
-		infectedList := strings.Join(infectedFiles, ", ")
 		fmt.Printf(
 			"Scanned files: %v\n"+
 				"Suspicious files (%v): %v\n"+
 				"Infected files (%v): %v\n",
 			scanned,
 			len(suspiciousFiles),
-			suspiciousList,
+			strings.Join(isuspiciousFiles, ", "),
 			len(infectedFiles),
-			infectedList,
+			strings.Join(infectedFiles, ", "),
 		)
 	} else {
 		fmt.Println(helpPage)
@@ -151,6 +149,7 @@ func scanFile(filePath string) {
 			responseBytes, errorObject := ioutil.ReadAll(responseObject.Body)
 			if errorObject != nil {
 				fmt.Printf("[%v] Unable to read request: %v\n", filePath, errorObject.Error())
+				suspiciousFiles = append(suspiciousFiles, filePath)
 				return
 			}
 			if strings.Contains(string(responseBytes), "ms-msdt") {
