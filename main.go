@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/fatih/color"
@@ -18,6 +19,7 @@ var (
 	recursiveScanning bool
 	verboseOutput     bool
 	scanned           int
+	valid             int
 	infectedFiles     []string
 	suspiciousFiles   []string
 	warningColor      *color.Color = color.New(color.FgRed)
@@ -80,14 +82,10 @@ func main() {
 			fmt.Println()
 		}
 		fmt.Printf(
-			"Scanned files: %v\n"+
-				"Suspicious files (%v): %v\n"+
-				"Infected files (%v): %v\n",
-			scanned,
-			len(suspiciousFiles),
-			strings.Join(isuspiciousFiles, ", "),
-			len(infectedFiles),
-			strings.Join(infectedFiles, ", "),
+			color.New(color.FgGreen).Add(color.Bold).Sprintf("Scanned files: ") + strconv.Itoa(scanned) +
+				color.New(color.FgGreen).Add(color.Bold).Sprintf("\nValid documents: ") + strconv.Itoa(valid) +
+				color.New(color.FgYellow).Add(color.Bold).Sprintf("\nSuspicious files (%v): ", len(suspiciousFiles)) + strings.Join(suspiciousFiles, ", ") +
+				color.New(color.FgRed).Add(color.Bold).Sprintf("\nInfected files (%v): ", len(infectedFiles)) + strings.Join(infectedFiles, ", ") + "\n",
 		)
 	} else {
 		fmt.Println(helpPage)
@@ -97,9 +95,13 @@ func main() {
 func scanFile(filePath string) {
 	document, errorObject := zip.OpenReader(filePath)
 	if errorObject != nil {
-		fmt.Printf("[%v] %v\n", filePath, errorObject.Error())
+		if verboseOutput {
+			fmt.Printf("[%v] %v\n", filePath, errorObject.Error())
+		}
 		return
 	}
+	fmt.Printf("[%v] Scanning file as zip...\n", filePath)
+	valid++
 	defer document.Close()
 	for _, zipFile := range document.File {
 		if zipFile.Name == "word/_rels/document.xml.rels" {
@@ -129,6 +131,7 @@ func scanFile(filePath string) {
 				if verboseOutput {
 					fmt.Printf("[%v] No URL found in word/_rels/document.xml.rels\n", filePath)
 				}
+				fmt.Printf("[%v] No Follina exploit found\n", filePath)
 				return
 			}
 			match := strings.Replace(string(matches[0]), "mhtml:", "", -1)
@@ -139,7 +142,7 @@ func scanFile(filePath string) {
 			}
 			responseObject, errorObject := http.Get(url)
 			if errorObject != nil {
-				warningColor.Printf("[%v] Unable to send a request: %v\n", filePath, errorObject.Error())
+				warningColor.Printf("[%v] %v\n", filePath, errorObject.Error())
 				suspiciousFiles = append(suspiciousFiles, filePath)
 				return
 			}
@@ -148,7 +151,7 @@ func scanFile(filePath string) {
 			}
 			responseBytes, errorObject := ioutil.ReadAll(responseObject.Body)
 			if errorObject != nil {
-				fmt.Printf("[%v] Unable to read request: %v\n", filePath, errorObject.Error())
+				fmt.Printf("[%v] %v\n", filePath, errorObject.Error())
 				suspiciousFiles = append(suspiciousFiles, filePath)
 				return
 			}
@@ -158,7 +161,7 @@ func scanFile(filePath string) {
 				warningColor.Printf("%v\n%v\n%v\n", separator, message, separator)
 				infectedFiles = append(infectedFiles, filePath)
 			} else {
-				fmt.Printf("[%v] No Follina exploit found in %v\n", filePath, filePath)
+				fmt.Printf("[%v] No Follina exploit found\n", filePath)
 			}
 			return
 		}
