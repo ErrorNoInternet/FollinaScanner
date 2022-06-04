@@ -42,32 +42,32 @@ func main() {
 			} else if argument == "-v" || argument == "--verbose" {
 				verboseOutput = true
 			} else {
-				fileData, errorObject := os.Stat(argument)
-				if errorObject != nil {
-					fmt.Printf("[%v] %v\n", argument, errorObject.Error())
+				fileData, err := os.Stat(argument)
+				if err != nil {
+					fmt.Printf("[%v] %v\n", argument, err.Error())
 					continue
 				}
 				if fileData.IsDir() {
 					if recursiveScanning {
-						errorObject = filepath.Walk(argument,
-							func(path string, data os.FileInfo, errorObject error) error {
-								if errorObject != nil {
-									return errorObject
+						err = filepath.Walk(argument,
+							func(path string, data os.FileInfo, err error) error {
+								if err != nil {
+									return err
 								}
-								fileData, errorObject := os.Stat(path)
-								if errorObject == nil {
+								fileData, err := os.Stat(path)
+								if err == nil {
 									if !fileData.IsDir() {
 										scanFile(path)
 										scanned++
 									}
 									return nil
 								} else {
-									fmt.Printf("[%v] %v\n", argument, errorObject.Error())
-									return errorObject
+									fmt.Printf("[%v] %v\n", argument, err.Error())
+									return err
 								}
 							})
-						if errorObject != nil {
-							fmt.Printf("[%v] %v\n", argument, errorObject.Error())
+						if err != nil {
+							fmt.Printf("[%v] %v\n", argument, err.Error())
 						}
 					} else {
 						fmt.Printf("[%v] Is a directory: %v\n", argument, argument)
@@ -93,10 +93,10 @@ func main() {
 }
 
 func scanFile(filePath string) {
-	document, errorObject := zip.OpenReader(filePath)
-	if errorObject != nil {
+	document, err := zip.OpenReader(filePath)
+	if err != nil {
 		if verboseOutput {
-			fmt.Printf("[%v] %v\n", filePath, errorObject.Error())
+			fmt.Printf("[%v] %v\n", filePath, err.Error())
 		}
 		return
 	}
@@ -108,15 +108,15 @@ func scanFile(filePath string) {
 			if verboseOutput {
 				fmt.Printf("[%v] Found word/_rels/document.xml.rels\n", filePath)
 			}
-			file, errorObject := zipFile.Open()
-			if errorObject != nil {
-				fmt.Printf("[%v] %v\n", filePath, errorObject.Error())
+			file, err := zipFile.Open()
+			if err != nil {
+				fmt.Printf("[%v] %v\n", filePath, err.Error())
 				return
 			}
 			defer file.Close()
-			fileBytes, errorObject := ioutil.ReadAll(file)
-			if errorObject != nil {
-				fmt.Printf("[%v] %v\n", filePath, errorObject.Error())
+			fileBytes, err := ioutil.ReadAll(file)
+			if err != nil {
+				fmt.Printf("[%v] %v\n", filePath, err.Error())
 				return
 			}
 			if len(strings.TrimSpace(string(fileBytes))) == 0 {
@@ -140,18 +140,18 @@ func scanFile(filePath string) {
 			if verboseOutput {
 				fmt.Printf("[%v] Sending HTTP GET request to %v...\n", filePath, url)
 			}
-			responseObject, errorObject := http.Get(url)
-			if errorObject != nil {
-				warningColor.Printf("[%v] %v\n", filePath, errorObject.Error())
+			responseObject, err := http.Get(url)
+			if err != nil {
+				warningColor.Printf("[%v] %v\n", filePath, err.Error())
 				suspiciousFiles = append(suspiciousFiles, filePath)
 				return
 			}
 			if verboseOutput {
 				fmt.Printf("[%v] Response received!\n", filePath)
 			}
-			responseBytes, errorObject := ioutil.ReadAll(responseObject.Body)
-			if errorObject != nil {
-				fmt.Printf("[%v] %v\n", filePath, errorObject.Error())
+			responseBytes, err := ioutil.ReadAll(responseObject.Body)
+			if err != nil {
+				fmt.Printf("[%v] %v\n", filePath, err.Error())
 				suspiciousFiles = append(suspiciousFiles, filePath)
 				return
 			}
