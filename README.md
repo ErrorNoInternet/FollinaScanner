@@ -20,3 +20,4 @@ go build
 ```
 Use `./follina-scanner --help` for a list of arguments
 
+<sub>If you would like to modify or use this repository (including its code) in your own project, please be sure to credit!</sub>
