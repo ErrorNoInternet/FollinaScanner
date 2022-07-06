@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/fatih/color"
 )
@@ -104,47 +105,50 @@ func scanFile(filePath string) {
 	valid++
 	defer document.Close()
 	for _, zipFile := range document.File {
-		if zipFile.Name == "word/_rels/document.xml.rels" {
+		if zipFile.FileInfo().IsDir() {
+			continue
+		}
+		if strings.Contains(zipFile.Name, "_rels") {
 			if verboseOutput {
-				fmt.Printf("[%v] Found word/_rels/document.xml.rels\n", filePath)
+				fmt.Printf("[%v] Found %v\n", filePath, zipFile.Name)
 			}
 			file, err := zipFile.Open()
 			if err != nil {
 				fmt.Printf("[%v] %v\n", filePath, err.Error())
-				return
+				continue
 			}
 			defer file.Close()
 			fileBytes, err := ioutil.ReadAll(file)
 			if err != nil {
 				fmt.Printf("[%v] %v\n", filePath, err.Error())
-				return
+				continue
 			}
 			if len(strings.TrimSpace(string(fileBytes))) == 0 {
 				if verboseOutput {
-					fmt.Printf("[%v] Empty file: word/_rels/document.xml.rels\n", filePath)
+					fmt.Printf("[%v] Empty file: %v\n", filePath, zipFile.Name)
 				}
-				return
+				continue
 			}
 			regex := regexp.MustCompile("Target=\"(mhtml:|x-usc:)?https?://.+\\.html.?\"")
 			matches := regex.FindAll(fileBytes, 1)
 			if len(matches) == 0 {
 				if verboseOutput {
-					fmt.Printf("[%v] No URL found in word/_rels/document.xml.rels\n", filePath)
+					fmt.Printf("[%v] No URL found in %v\n", filePath, zipFile.Name)
 				}
-				fmt.Printf("[%v] No Follina exploit found\n", filePath)
-				return
+				continue
 			}
 			match := strings.Replace(string(matches[0]), "mhtml:", "", -1)
 			url := strings.Split(match[8:len(match)-1], "!")[0]
-			fmt.Printf("[%v] Found URL in word/_rels/document.xml.rels: \"%v\"\n", filePath, url)
+			fmt.Printf("[%v] Found URL in %v: \"%v\"\n", filePath, zipFile.Name, url)
 			if verboseOutput {
 				fmt.Printf("[%v] Sending HTTP GET request to %v...\n", filePath, url)
 			}
-			responseObject, err := http.Get(url)
+			client := &http.Client{Timeout: 10 * time.Second}
+			responseObject, err := client.Get(url)
 			if err != nil {
 				warningColor.Printf("[%v] %v\n", filePath, err.Error())
 				suspiciousFiles = append(suspiciousFiles, filePath)
-				return
+				continue
 			}
 			if verboseOutput {
 				fmt.Printf("[%v] Response received!\n", filePath)
@@ -153,7 +157,7 @@ func scanFile(filePath string) {
 			if err != nil {
 				fmt.Printf("[%v] %v\n", filePath, err.Error())
 				suspiciousFiles = append(suspiciousFiles, filePath)
-				return
+				continue
 			}
 			if strings.Contains(string(responseBytes), "ms-msdt") {
 				message := fmt.Sprintf("[%v] Found Follina exploit in %v (%v)", filePath, filePath, url)
