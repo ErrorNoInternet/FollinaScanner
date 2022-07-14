@@ -105,10 +105,7 @@ func scanFile(filePath string) {
 	valid++
 	defer document.Close()
 	for _, zipFile := range document.File {
-		if zipFile.FileInfo().IsDir() {
-			continue
-		}
-		if strings.Contains(zipFile.Name, "_rels") {
+		if strings.Contains(zipFile.Name, "_rels") && !zipFile.FileInfo().IsDir() {
 			if verboseOutput {
 				fmt.Printf("[%v] Found %v\n", filePath, zipFile.Name)
 			}
