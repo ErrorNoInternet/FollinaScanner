@@ -4,14 +4,14 @@ A tool written in Go that scans files & directories for the Follina exploit (CVE
 *(Note: "Suspicious files" means files that have a URL in them but isn't working)*
 
 ## Compiling
-```
+```sh
 git clone https://github.com/ErrorNoInternet/FollinaScanner
 cd FollinaScanner
 go build
 ```
 
 ## Usage
-```
+```sh
 # Scan the current directory
 ./follina-scanner -r .
 
